@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# script to compile yap for Android.
+
+PROJECT=~/github/YAPDroid
+
+APP_SRC=$PROJECT/app
+YAP_SRC=$APP_SRC/src/yap
+
+cd ${APP_SRC}
+
+rm -rf externalNativeBuild build generated src/main/java/pt/up/yap/lib
+
+mkdir -p externalNativeBuild/swig
+mkdir -p src/main/java/pt/up/yap/lib
+
+
+swig -Wall  -c++  -I../../H -Isrc/yap/H/generated \
+      -Isrc/yap/include -Isrc/yap/os -Isrc/yap/OPTYap \
+      -Isrc/yap/utf8proc -Isrc/yap/CXX -java  \
+      -package pt.up.yap.lib \
+      -outdir src/main/java/pt/up/yap/lib \
+      -o externalNativeBuild/swig/yapj.cpp \
+      -addextern \
+      src/yap/packages/swig/yap.i
+
+mkdir -p  assets/share/Yap/pl
+mkdir -p  assets/share/Yap/os
+cp -a src/yap/library/*.pl src/yap/library/*.yap assets/share/Yap
+cp -a src/yap/pl/*.yap assets/share/Yap/pl
+cp -a src/yap/os/*.yap assets/share/Yap/os
+
+#in WIN32 install  gcc/ clang or use /EP /P
+for i in  myddas \
+  myddas_assert_predicates \
+  myddas_top_level \
+  myddas_errors \
+  myddas_prolog2sql \
+  myddas_mysql \
+  myddas_postgres \
+  myddas_sqlite3 \
+  myddas_util_predicates \
+  myddas_prolog2sql_optimizer ; do
+    gcc -x c -E -P -w   -o assets/share/Yap/$i.yap src/yap/packages/myddas/pl/$i.ypp;\
+	done
+
+
+cd ..
+
+chmod +x ./gradlew
+
+FINALDIR=app/build/intermediates/transforms/mergeJniLibs/debug/folders/2000/1f/main/lib
+mkdir -p $FINALDIR
+
+./gradlew tasks
+
+cp -a ../gmp/* $FINALDIR
+
+./gradlew installDebug
