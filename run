@@ -16,15 +16,16 @@ then
 fi
 if [ ! -e yap ]
 then
-    git clonehttps://github.com/Rupan/gmp.git
+    git clone https://github.com/Rupan/gmp.git
 fi
 
+cd ..
 
 #clean up
 rm -rf .externalNativeBuild build generated src/main/java/pt/up/yap/lib
 
 # ensure these two directories exist
-mkdir -p externalNativeBuild/swig
+mkdir -p .externalNativeBuild/swig
 mkdir -p src/main/java/pt/up/yap/lib
 
 # call swig to generate the java->C++ interface
@@ -33,7 +34,7 @@ swig -Wall  -c++  -I../../H -Isrc/yap/H/generated \
       -Isrc/yap/utf8proc -Isrc/yap/CXX -java  \
       -package pt.up.yap.lib \
       -outdir src/main/java/pt/up/yap/lib \
-      -o $APP_SRC/externalNativeBuild/swig/yapj.cpp \
+      -o .externalNativeBuild/swig/yapj.cpp \
       -addextern \
       src/yap/packages/swig/yap.i
 
@@ -55,7 +56,7 @@ for i in  myddas \
   myddas_prolog2sql_optimizer ; do
     gcc -x c -E -P -w   -o assets/share/Yap/$i.yap src/yap/packages/myddas/pl/$i.ypp;\
 	done
-    gcc -x c -E -P -w -DMYDDAS_SQLITE3  -o assets/share/Yap/myddas_sqlite3.yap src/yap/packages/myddas/plmyddas_driver.ypp
+    gcc -x c -E -P -w -DMYDDAS_SQLITE3  -o assets/share/Yap/myddas_sqlite3.yap src/yap/packages/myddas/pl/myddas_driver.ypp
 
 
 cd ..
