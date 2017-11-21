@@ -1,0 +1,27 @@
+mkdir -p ~/github/YAPDroid/app/src/main/java/pt/up/yap/lib
+rm -f ~/github/YAPDroid/app/src/main/java/pt/up/yap/lib/*
+mkdir -p ~/github/YAPDroid/app/src/main/jni
+mkdir -p ~/github/YAPDroid/app/src/main/assets/Yap
+mkdir -p ~/github/YAPDroid/app/src/main/assets/Yap/pl
+mkdir -p ~/github/YAPDroid/app/src/main/assets/Yap/os
+
+cd ~/github/YAPDroid/app/src/yap/packages/swig/android
+swig -c++ -java -outdir ~/github/YAPDroid/app/src/main/java/pt/up/yap/lib -addextern -I../../../CXX \
+    -I../../../H -I../../../include -I../../../H/generated -I../../../OPTYap     -I../../..  -DX_API""
+    -o /dev/null \
+    -oh /dev/null \
+    -package pt.up.yap.lib ../yap.i
+
+swig -c++ -java -outdir ~/github/YAPDroid/app/src/main/java/pt/up/yap/lib -addextern -I../../../CXX \
+    -I../../../H -I../../../include -I../../../H/generated -I../../../OPTstreamer  \
+    -I../../..  -DX_API""\
+    -o /dev/null \
+    -oh /dev/null \
+    -package pt.up.yap.lib streamer.i
+
+cp ~/github/YAPDroid/app/src/yap/library/*.yap ~/github/YAPDroid/app/src/main/assets/Yap
+cp ~/github/YAPDroid/app/src/yap/library/*.pl ~/github/YAPDroid/app/src/main/assets/Yap
+cp ~/github/YAPDroid/app/src/yap/swi/library/*.yap ~/github/YAPDroid/app/src/main/assets/Yap
+cp ~/github/YAPDroid/app/src/yap/swi/library/*.pl ~/github/YAPDroid/app/src/main/assets/Yap
+cp ~/github/YAPDroid/app/src/yap/pl/*.yap ~/github/YAPDroid/app/src/main/assets/Yap/pl
+cp ~/github/YAPDroid/app/src/yap/os/*.yap ~/github/YAPDroid/app/src/main/assets/Yap/os

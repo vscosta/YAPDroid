@@ -1,12 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 25
     defaultConfig {
         applicationId "pt.up.yap"
         minSdkVersion 19
-        targetSdkVersion 23
+        targetSdkVersion 19
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -16,7 +15,7 @@ android {
 //                arguments "-DANDROID_TOOLCHAIN=clang"
 //                cFlags "-DTEST_C_FLAG1", "-DTEST_C_FLAG2"
 //                cppFlags "-DTEST_CPP_FLAG2", "-DTEST_CPP_FLAG2"
-               abiFilters "x86", "armeabi"
+                abiFilters "x86", "armeabi-v7a", "armeabi"
                 cppFlags "-frtti -fexceptions"
             }
         }
@@ -26,6 +25,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            jniDebuggable true
+        }
     }
     externalNativeBuild {
         cmake {
@@ -33,17 +35,108 @@ android {
         }
     }
     sourceSets {
-        main { assets.srcDirs = ['src/main/assets']
-            jniLibs.srcDirs = [ 'src/gmp']}
+        main {
+            assets.srcDirs = ['src/generated/assets']
+            java.srcDirs = ['src/main/java', 'src/generated/java']
+            jniLibs.srcDirs = ['src/gmp']
+        }
     }
+
+//
+//def String root = file(".").getAbsolutePath()
+//
+//def String task1 = 'yap'
+//def String task1_src = "${root}/src/yap/packages/swig/yap.i"
+//def String task2 = 'streamer'
+//def String task2_src = "${root}/src/yap/packages/swig/android/streamer.i"
+//def String inDir ="${root}/src/yap/packages/swig/android"
+//def String modul = 'pt.up.yap.lib'
+//def String outJava =  "${root}/src/generated/java/pt/up/yap/lib"
+//def String outJNI = "${root}/src/generated/jni"
+//def String includes = "-I${root}/src/yap/CXX -I${root}/src/yap/H -I${root}/src/yap/include -I${root}/src/yap/H/generated -I${root}/src/yap/OPTYap  -I${root}/src/yap"
+//def String swig = "swig"
+//
+//task runSWIG {
+//    project.file("${root}/src/generated/assets/Yap").mkdirs()
+//    project.file("${root}/src/generated/assets/Yap/pl").mkdirs()
+//    project.file("${root}/src/generated/assets/Yap/os").mkdirs()
+//    project.file("${root}/src/generated/java/pt/up/yap/lib").mkdirs()
+//    project.file("${root}/src/generated/jni").mkdirs()
+//
+//    def String s = """${swig} -c++ -java -outdir ${outJava}
+//                    -addextern  ${includes}
+//                    -o ${outJNI}/${task1}_swig.cpp -oh ${outJNI}/${task1}_swig.h
+//                    -package ${modul} ${task1_src}"""
+//    def script = s.execute()
+//    script.in.eachLine {line -> println line}
+//    script.err.eachLine {line -> println "ERROR: " + line}
+//    script.waitFor()
+//    String s2 = """${swig} -c++ -java -outdir ${outJava}
+//                -addextern ${includes}
+//                   -o ${outJNI}/${task2}_swig.cpp -oh ${outJNI}/${task2}_swig.h
+//                -package ${modul} ${task2_src}"""
+//    script = s2.execute()
+//    script.in.eachLine {line -> println line}
+//    script.err.eachLine {line -> println "ERROR: " + line}
+//    script.waitFor()
+//
+//}
+//task copyYAPFiles(type: Copy) {
+//    from 'src/yap/pl'
+//    from 'src/yap/swi/library'
+//    into 'src/generated/assets/Yap/pl'
+//    include '**/*.yap'
+//    include '**/*.pl'
+//
+//}
+//
+//
+//task copyYAPFilesPl(type: Copy) {
+//    from 'src/yap/os'
+//    into 'src/generated/assets/Yap/os'
+//    include '**/*.yap'
+//    include '**/*.pl'
+//}
+//
+//    task copyYAPFilesOs(type: Copy) {
+//        from 'src/yap/library'
+//        into 'src/generated/assets/Yap'
+//        include '**/*.yap'
+//        include '**/*.pl'
+//    }
+//
+//
+//
+//project.afterEvaluate {
+//    preBuild.dependsOn copyYAPFiles
+//    copyYAPFiles.dependsOn copyYAPFilesOs
+//    copyYAPFilesOs.dependsOn copyYAPFilesPl
+//    copyYAPFilesPl.dependsOn runSWIG
+
+//}
+//
+//afterEvaluate {
+//    android.applicationVariants.all { variant ->
+//        variant.javaCompiler.dependsOn(copyYAPFiles)
+//    }
+//}
+
+}
+
+project.afterEvaluate {
+    // Not sure how much of a hack this is - but it allows CMake/SWIG to run before Android Studio
+    // complains about missing generated files
+    // TODO: Probably need a release hook too?
+    javaPreCompileDebug.dependsOn externalNativeBuildDebug
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile fileTree(dir: 'gmp', include: ['*.so'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile fileTree(include: ['*.so'], dir: 'gmp')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:25.0.0'
     testCompile 'junit:junit:4.12'
 }
+
